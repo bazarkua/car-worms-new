@@ -1,5 +1,5 @@
 import '../views/App.css';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Axios from "axios";
 import { render } from 'react-dom';
@@ -10,15 +10,19 @@ function CustomersList() {
   const [customersList, setCustomersList] = useState([]);
   
   
+    const getCustomers = () => {
+      Axios.get("http://localhost:3001/customers").then((response) => {
+        setCustomersList(response.data);
+        
+      });
+    };
+  
 
-  const getCustomers = () => {
-    Axios.get("http://localhost:3001/customers").then((response) => {
-      setCustomersList(response.data);
-      
-    });
-  };
 
- 
+  useEffect(() => {
+    getCustomers();
+    
+  },[]);
   
   
     return (
@@ -45,7 +49,7 @@ function CustomersList() {
               <div>
                 <h2 className="res-title">
                   <span className="search">
-                    <input type="text" placeholder="search" />
+                    <input type="text" placeholder="search by id" />
                     <span><a href="#">
                         <span className="material-icons">manage_search</span>
                         

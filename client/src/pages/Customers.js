@@ -2,18 +2,35 @@ import React from "react";
 import logo from '../assets/logo.png';
 import profile from '../assets/profile.png'
 import '../views/App.css';
-import CustomersList from './CustomersList';
-import { useState } from "react";
+
 import { useNavigate, useParams } from "react-router-dom";
 import Axios from "axios";
+import { useEffect, useState } from "react";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import CustomersList from "./CustomersList";
+import UpdateCustomer from "./CustomerUpdate";
+
 function Customers() {
 
   let navigate = useNavigate();
   let { username } = useParams();
-  const [customer_id, setCustomerId] = useState(0);
+  const [customer_id, setCustomerId] = useState();
   const [customer_fname, setFname] = useState("");
   const [customer_lname, setLname] = useState("");
   const [customer_email, setEmail] = useState("");
+  
+  
+ 
+  const notify = () => toast.success('New Customer Added!', {
+    position: "top-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    });;
   
   const [customersList, setCustomersList] = useState([]);
 
@@ -24,6 +41,7 @@ function Customers() {
       customer_lname: customer_lname,
       customer_email: customer_email,
     }).then(() => {
+      getCustomers();
       setCustomersList([
         ...customersList,
         {
@@ -35,6 +53,64 @@ function Customers() {
       ]);
     });
   };
+
+  const getCustomers = () => {
+    Axios.get("http://localhost:3001/customers").then((response) => {
+      setCustomersList(response.data);
+      
+    });
+  };
+
+  const deleteCustomer = (id) => {
+    Axios.delete(`http://localhost:3001/deleteCustomer/${id}`).then((response) => {
+      getCustomers();
+      CustomersList(
+        CustomersList.filter((val) => {
+          return val.id != id;
+        })
+      );
+    });
+  };
+
+  const updateCustomer = (id) => {
+    Axios.put("http://localhost:3001/updateCustomer", {customer_fname: customer_fname,
+    customer_lname: customer_lname,
+    customer_email: customer_email}).then(
+      (response) => {
+        getCustomers();
+        setCustomersList(
+          CustomersList.map((val) => {
+            return val.customer_id == id
+              ? {
+                customer_id: customer_id,
+                customer_fname: customer_fname,
+                customer_lname: customer_lname,
+                customer_email: customer_email,
+                }
+              : val;
+          })
+        );
+      }
+    );
+  };
+
+
+useEffect(() => {
+  getCustomers();
+  
+},[]);
+  
+  
+  const newCustomerAdded = () =>
+  {
+    
+    addCustomer();
+    
+    notify();
+    
+    
+  }
+  
   
   return (
     
@@ -120,7 +196,7 @@ function Customers() {
               <table className="form1">
                 <thead>
                   <tr>
-                    <th className="text-muted  light">customer_id</th>
+                   
                     <th className="text-muted  light">customer_fname</th>
                     <th className="text-muted  light">customer_lname</th>
                     <th className="text-muted  light">customer_email</th>
@@ -128,12 +204,11 @@ function Customers() {
                 </thead>
                 <tbody>
                   <tr>
-                    <td><input className="form" type="text" onChange={(event) => {
-                      setCustomerId(event.target.value);
-                    }}/></td>
+                    
                     <td><input className="form" type="text" onChange={(event) => {
                       setFname(event.target.value);
-                    }} /></td>
+                      
+                    }}/></td>
                     <td><input className="form" type="text" onChange={(event) => {
                       setLname(event.target.value);
                     }} /></td>
@@ -143,9 +218,96 @@ function Customers() {
                   </tr>
                 </tbody>
               </table>
-              <button className="submit" onClick={addCustomer}>Submit</button>
+              <div>
+              <button className="submit" onClick={newCustomerAdded}>Submit</button>
+              
+              <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                />
+              </div>
             </div>
-            <CustomersList /> 
+            <div className="container">
+          
+          <main>
+            {/*<h1>Dashboard</h1>
+
+                    <div class="date-curr">
+                        <input type="date">
+                    </div>
+                */}
+          
+            <div className="orders reservations-header"> 
+              <div>
+                <h2 className="res-title">
+                  <span className="search">
+                    <input type="text" placeholder="search by id" />
+                    <span><a href="#">
+                        <span className="material-icons">manage_search</span>
+                        
+                      </a></span>
+                  </span>
+                  
+                </h2>
+              </div>
+              <div>
+              </div>
+              { customersList.map((val,key) => {
+          return (
+            <div>
+            <table>
+            <thead>
+              <tr>
+                <th className="text-muted light">customer_id*</th>
+                <th className="text-muted light">customer_fname</th>
+                <th className="text-muted light">customer_lname</th>
+                <th className="text-muted light">customer_email</th>
+                
+                <button className="material-icons delete-btn"
+                  onClick={() => {
+                    deleteCustomer(val.customer_id);
+                  }}>
+                  delete
+                </button>
+                  <button className="material-icons edit-btn">
+                    edit
+                  </button>
+                
+                
+                
+                
+              </tr>
+            </thead>
+            
+            <tbody>
+              <tr>
+                <td className="dark">{val.customer_id}</td>
+                <td className="light dark">{val.customer_fname}</td>
+                <td className="light dark">{val.customer_lname}</td>
+                <td className="light dark">{val.customer_email}</td>
+              </tr>
+            </tbody>
+            
+          </table>
+            
+            </div>
+          
+            );
+          })}
+          
+              
+            </div>
+          </main>
+          {/*-----END OF MAIN------------*/}
+         
+        </div> 
           </main>
           {/*-----END OF MAIN------------*/}
           <div className="right">
@@ -178,6 +340,7 @@ function Customers() {
       
       </div>
     </div>
+  
   );
  
 }

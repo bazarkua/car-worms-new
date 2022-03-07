@@ -99,7 +99,7 @@ function StoresList() {
                   </tr>
                 </tbody>
               </table>
-              <a href="#" className='show-all'>Show All</a>
+              
             </div>
           </main>
           {/*-----END OF MAIN------------*/}

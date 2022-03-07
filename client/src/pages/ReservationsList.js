@@ -101,7 +101,7 @@ function ReservationsList() {
                   </tr>
                 </tbody>
               </table>
-              <a className = "show-all" href="#">Show All</a>
+              
             </div>
           </main>
           {/*-----END OF MAIN------------*/}
